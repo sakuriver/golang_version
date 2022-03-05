@@ -1,0 +1,686 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "AnimeShoppigs",
+    "version": "1.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000"
+    }
+  ],
+  "paths": {
+    "/users/{userId}": {
+      "parameters": [
+        {
+          "schema": {
+            "type": "integer"
+          },
+          "name": "userId",
+          "in": "path",
+          "required": true,
+          "description": "Id of an existing user."
+        }
+      ],
+      "get": {
+        "summary": "Get User Info by User ID",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "User Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                },
+                "examples": {
+                  "Get User Alice Smith": {
+                    "value": {
+                      "id": 142,
+                      "firstName": "Alice",
+                      "lastName": "Smith",
+                      "email": "alice.smith@gmail.com",
+                      "dateOfBirth": "1997-10-31",
+                      "emailVerified": true,
+                      "signUpDate": "2019-08-24"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User Not Found"
+          }
+        },
+        "operationId": "get-users-userId",
+        "description": "Retrieve the information of the user with the matching user ID."
+      },
+      "patch": {
+        "summary": "Update User Information",
+        "operationId": "patch-users-userId",
+        "responses": {
+          "200": {
+            "description": "User Updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                },
+                "examples": {
+                  "Updated User Rebecca Baker": {
+                    "value": {
+                      "id": 13,
+                      "firstName": "Rebecca",
+                      "lastName": "Baker",
+                      "email": "rebecca@gmail.com",
+                      "dateOfBirth": "1985-10-02",
+                      "emailVerified": false,
+                      "createDate": "2019-08-24"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User Not Found"
+          },
+          "409": {
+            "description": "Email Already Taken"
+          }
+        },
+        "description": "Update the information of an existing user.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "firstName": {
+                    "type": "string"
+                  },
+                  "lastName": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string",
+                    "description": "If a new email is given, the user's email verified property will be set to false."
+                  },
+                  "dateOfBirth": {
+                    "type": "string"
+                  }
+                }
+              },
+              "examples": {
+                "Update First Name": {
+                  "value": {
+                    "firstName": "Rebecca"
+                  }
+                },
+                "Update Email": {
+                  "value": {
+                    "email": "rebecca@gmail.com"
+                  }
+                },
+                "Update Last Name & Date of Birth": {
+                  "value": {
+                    "lastName": "Baker",
+                    "dateOfBirth": "1985-10-02"
+                  }
+                }
+              }
+            }
+          },
+          "description": "Patch user properties to update."
+        }
+      }
+    },
+    "/user": {
+      "post": {
+        "summary": "Create New User",
+        "operationId": "post-user",
+        "responses": {
+          "200": {
+            "description": "User Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                },
+                "examples": {
+                  "New User Bob Fellow": {
+                    "value": {
+                      "id": 12,
+                      "firstName": "Bob",
+                      "lastName": "Fellow",
+                      "email": "bob.fellow@gmail.com",
+                      "dateOfBirth": "1996-08-24",
+                      "emailVerified": false,
+                      "createDate": "2020-11-18"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing Required Information"
+          },
+          "409": {
+            "description": "Email Already Taken"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "firstName": {
+                    "type": "string"
+                  },
+                  "lastName": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string"
+                  },
+                  "dateOfBirth": {
+                    "type": "string",
+                    "format": "date"
+                  }
+                },
+                "required": [
+                  "firstName",
+                  "lastName",
+                  "email",
+                  "dateOfBirth"
+                ]
+              },
+              "examples": {
+                "Create User Bob Fellow": {
+                  "value": {
+                    "firstName": "Bob",
+                    "lastName": "Fellow",
+                    "email": "bob.fellow@gmail.com",
+                    "dateOfBirth": "1996-08-24"
+                  }
+                }
+              }
+            }
+          },
+          "description": "Post the necessary fields for the API to create a new user."
+        },
+        "description": "Create a new user."
+      }
+    },
+    "/products/{buyerid}": {
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "buyerid",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "get": {
+        "summary": "売り子の商品一覧を見せてもらう(anime shop buyer list)",
+        "tags": [
+          "shop",
+          "product"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "description": "売り子が打っている商品一覧",
+                  "items": {
+                    "$ref": "#/components/schemas/BuyerProducts"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "operationId": "get-products-buyerid",
+        "description": ""
+      }
+    },
+    "/shopproducts/{shopid}": {
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "shopid",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "get": {
+        "summary": "指定したお店の商品一覧(売り子は特定商品だけ使うので、これをダウンロード)",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "example-1": {
+                    "value": {
+                      "id": "string",
+                      "product_type": "string",
+                      "name_code": "string",
+                      "product_type_id": "string",
+                      "description_code": "string",
+                      "price": 0,
+                      "stock_num": 0,
+                      "sale_start_date_time": "string",
+                      "sale_end_date_time": "string"
+                    }
+                  },
+                  "description": "お店で取り扱っている店舗商品カタログ",
+                  "items": {
+                    "$ref": "#/components/schemas/ShopProductMaster"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "operationId": "get-shopproducts-shopid"
+      }
+    },
+    "/shopproducts/buy/order/start": {
+      "post": {
+        "summary": "指定した商品の購入開始(クレジットカードや各種支払いの呼び出し)",
+        "tags": [
+          "shop",
+          "product"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "order_id": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "examples": {
+                  "example-1": {
+                    "value": {
+                      "order_id": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "result_code": {
+                      "type": "integer",
+                      "description": "注文結果コード"
+                    },
+                    "order_id": {
+                      "type": "string",
+                      "description": "注文番号"
+                    }
+                  }
+                },
+                "examples": {
+                  "example-1": {
+                    "value": {
+                      "result_code": 0,
+                      "order_id": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "operationId": "post-shopproducts-buy",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "byer_order_id": {
+                    "type": "string"
+                  },
+                  "order_user_id": {
+                    "type": "integer"
+                  }
+                }
+              },
+              "examples": {}
+            }
+          },
+          "description": ""
+        }
+      },
+      "parameters": []
+    },
+    "/shopproducts/buy/order/end": {
+      "post": {
+        "summary": "購入完了処理(レシートの受け取り処理)",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "receipt_info": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "operationId": "post-shopproducts-buy-order-end",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "order_id": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/items": {
+      "get": {
+        "summary": "ユーザの所持アイテム一覧",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserBuyProduct"
+                  }
+                },
+                "examples": {
+                  "example-1": {
+                    "value": [
+                      {
+                        "user_id": 0,
+                        "base_item_id": "string",
+                        "buy_product_id": "string",
+                        "buy_num": 0,
+                        "buy_price": 0,
+                        "created_at": "string",
+                        "updated_at": "string"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "operationId": "get-user-items",
+        "description": "購入して、持っているアイテムの一覧を取得"
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "User": {
+        "title": "User",
+        "type": "object",
+        "description": "",
+        "examples": [
+          {
+            "id": 142,
+            "firstName": "Alice",
+            "lastName": "Smith",
+            "email": "alice.smith@gmail.com",
+            "dateOfBirth": "1997-10-31",
+            "emailVerified": true,
+            "signUpDate": "2019-08-24"
+          }
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "Unique identifier for the given user."
+          },
+          "firstName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "dateOfBirth": {
+            "type": "string",
+            "format": "date",
+            "example": "1997-10-31"
+          },
+          "emailVerified": {
+            "type": "boolean",
+            "description": "Set to true if the user's email has been verified."
+          },
+          "createDate": {
+            "type": "string",
+            "format": "date",
+            "description": "The date that the user was created."
+          }
+        },
+        "required": [
+          "id",
+          "firstName",
+          "lastName",
+          "email",
+          "emailVerified"
+        ]
+      },
+      "BuyerProducts": {
+        "title": "BuyerProducts",
+        "x-tags": [
+          "shop"
+        ],
+        "examples": [
+          [
+            {
+              "id": "string",
+              "shop_master_id": "string",
+              "buyer_id": "string",
+              "package_url": "string",
+              "num": "string",
+              "rate": "string",
+              "creatd_at": "string",
+              "updated_at": "string",
+              "": "string"
+            }
+          ]
+        ],
+        "description": "",
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/BuyerProduct"
+        },
+        "x-internal": false
+      },
+      "BuyerProduct": {
+        "title": "BuyerProduct",
+        "type": "object",
+        "x-tags": [
+          "shop"
+        ],
+        "examples": [
+          {
+            "id": "string",
+            "shop_master_id": "string",
+            "buyer_id": "string",
+            "package_url": "string",
+            "num": "string",
+            "rate": "string",
+            "creatd_at": "string",
+            "updated_at": "string"
+          }
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "shop_master_id": {
+            "type": "string"
+          },
+          "buyer_id": {
+            "type": "string"
+          },
+          "package_url": {
+            "type": "string"
+          },
+          "num": {
+            "type": "integer"
+          },
+          "rate": {
+            "type": "integer"
+          },
+          "creatd_at": {
+            "type": "string"
+          },
+          "updated_at": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "shop_master_id",
+          "buyer_id",
+          "package_url",
+          "num",
+          "rate",
+          "creatd_at",
+          "updated_at"
+        ]
+      },
+      "ShopProductMaster": {
+        "title": "ShopProductMaster",
+        "type": "object",
+        "x-tags": [
+          "shop"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "shop_id": {
+            "type": "string"
+          },
+          "name_code": {
+            "type": "string"
+          },
+          "product_type": {
+            "type": "string"
+          },
+          "product_type_id": {
+            "type": "string"
+          },
+          "description_code": {
+            "type": "string"
+          },
+          "price": {
+            "type": "integer"
+          },
+          "stock_num": {
+            "type": "integer"
+          },
+          "sale_start_date_time": {
+            "type": "string"
+          },
+          "sale_end_date_time": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name_code",
+          "product_type",
+          "product_type_id",
+          "description_code",
+          "price",
+          "stock_num",
+          "sale_start_date_time",
+          "sale_end_date_time"
+        ]
+      },
+      "UserBuyProduct": {
+        "title": "UserBuyProduct",
+        "type": "object",
+        "description": "購入した商品情報",
+        "properties": {
+          "user_id": {
+            "type": "integer"
+          },
+          "base_item_id": {
+            "type": "string"
+          },
+          "buy_product_id": {
+            "type": "string"
+          },
+          "buy_num": {
+            "type": "integer"
+          },
+          "buy_price": {
+            "type": "number"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "updated_at": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "user_id",
+          "base_item_id",
+          "buy_product_id",
+          "buy_num",
+          "buy_price",
+          "created_at",
+          "updated_at"
+        ]
+      }
+    },
+    "securitySchemes": {}
+  }
+}
