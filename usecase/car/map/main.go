@@ -1,10 +1,14 @@
 package main
 
 import (
+	"encoding/csv"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
+	"os"
+	"strconv"
+	"time"
 )
 
 var mapApiDomainRoot = "https://api.openstreetmap.org/api/0.6/"
@@ -34,8 +38,11 @@ type FullMapResult struct {
 	Elements    []MapElement `json:"elements"`
 }
 
+// アプリ用の地図マスターデータと実行結果出力
 func main() {
 	println("map data analize start")
+
+	startTime := time.Now()
 
 	// --header 'Content-Type: application/json' \
 
@@ -59,12 +66,12 @@ func main() {
 
 	println("map analize complete")
 
-	// 地図解析結果を出力
-	println(mapResult.VersionInfo)
-	println(mapResult.Generator)
-	println(mapResult.License)
-	println(mapResult.Attribution)
-	println(mapResult.CopyRight)
+	//元データが取得できたので、書き込むマスターデータを開く
+	f, err := os.OpenFile("masterdata/map.json", os.O_WRONLY|os.O_CREATE|os.O_APPEND, os.ModeAppend.Perm())
+	if err != nil {
+		println(err.Error())
+		return
+	}
 
 	println("取得した要素一覧を取得")
 	for _, element := range mapResult.Elements {
@@ -73,6 +80,46 @@ func main() {
 		println(fmt.Sprintf("%f", element.Lon))
 	}
 
+	_, err = f.Write(body)
+	if err != nil {
+		println(err.Error())
+		return
+	}
+
+	defer f.Close()
+
 	// データ保存処理を開始(クライアントアプリ向けに整形をする)
+
+	// アプリ内で使う配信データの生成時間を出力(国や地域拡大時の改善指標と運営レポートで利用)
+
+	println("map analize time %v", time.Since(startTime))
+
+	// 番号と実行時間によって「開発におけるリードタイム改善」用出力
+	// ミリ秒と秒単位での改善レポート
+	// ジョブズの言葉を借りると「１ユーザー当たり〇秒改善」及び「運営時のコスト〇秒改善により１日前の開発ストップを半日前に改善案」
+	developDataFormat := fmt.Sprintf("%d,%v", 1, time.Since(startTime).Milliseconds())
+
+	println(developDataFormat)
+	// 別kpiバッチ予定 前回から見た場合の待機時間改善秒数
+	records := [][]string{
+		{"No", "ExecTime"},
+		{"1", strconv.FormatInt(time.Since(startTime).Milliseconds(), 10)},
+	}
+
+	// 日付でのKPIローテーション
+	csvfile, err := os.Create(fmt.Sprintf("./kpi/map_generate_time_%s.csv", time.Now().UTC().Format("2006-01-02")))
+
+	w := csv.NewWriter(csvfile)
+
+	w.WriteAll(records)
+
+	// 経営層及び投資向けのレポーティングファイルとしてcsvファイル出力
+
+	// 本ジョブ以外の開発コスト用レポーティング集計
+
+	// １日の時間 - 間の時間(ここが0に近づくと、間の作業が0になる)
+
+	w.Flush()
+	csvfile.Close()
 
 }
