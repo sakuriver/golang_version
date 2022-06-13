@@ -46,7 +46,7 @@ func main() {
 
 	// --header 'Content-Type: application/json' \
 
-	var url = mapApiDomainRoot + "relation/10000000/full.json"
+	var url = mapApiDomainRoot + "relation/10000001/full.json"
 	println(url)
 	client := &http.Client{}
 	req, _ := http.NewRequest("GET", url, nil)
@@ -76,8 +76,8 @@ func main() {
 	println("取得した要素一覧を取得")
 	for _, element := range mapResult.Elements {
 		println(element.Id)
-		println(fmt.Sprintf("%f", element.Lat))
-		println(fmt.Sprintf("%f", element.Lon))
+		println(fmt.Sprintf("緯度 %f", element.Lat))
+		println(fmt.Sprintf("経度 %f", element.Lon))
 	}
 
 	_, err = f.Write(body)
