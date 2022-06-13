@@ -1,0 +1,62 @@
+ここは 2050年 
+
+様々な問題を解決する集団FTH(FeatureTechnologyHumanoid) が表れる
+
+彼らは、シンギュラリティなどを社会導入することを夢見て活動した。
+
+ ・労働者のロボット化
+ ・労働のロボット化による親子時間の増加
+ ・自然エネルギーによる電気コンセントに依存しない機械都市
+
+住居要素
+　新規開発
+　　建築
+　　　現場確認 MR(Hololens2 の子供)
+      建築機械リモート制御
+      CAD(けんちくぶつのデジタルデータ)
+
+移動要素
+　自動車 
+      https://news.microsoft.com/ja-jp/2021/10/19/211019-joint-development-of-security-solutions-for-the-connected-car/
+　　ドライバーが運転に集中できるようにする支援システム
+　　　https://azure.microsoft.com/ja-jp/overview/iot/industry/transportation-and-logistics/#demo
+　全人類
+    主人公「マップオープン(map open)」
+    そうすると、掌の上にマップが表れて気候やルートなどのウィンドウが空間に現れた
+    
+    まどか「あ、やっぱり頭が痛いの当たってた...!?」
+    主人公「それじゃあ、次の街へ移動しよう」
+    主人公「Search ウィルシティ」(Search Serviceへのリクエストが実行される)
+    そうすると、矢印が表れて次の街への線が表示される。
+    まどか「あたしの推しが道を教えてくれる。　はっ！？」
+    まどか「今回は、自動車乗っていくのどれくらい？」
+    主人公「Route Electric Car Search」
+    主人公が声を出すと、空間上に「average 40km hour 5h 20m」と表示される
+    まどか「5時間ちょっと寝てればいいんだね」
+    render customer support and comminication tool
+    主人公「まどかがいるし、MSとの連携許可して安全重視して出発しよう。」
+    MSサポータ「まどか生きている？　こんなファンタジーに巻き込まれちゃったね」
+    MSサポータ「イレギュラーに遭遇しないように僕たちが全力でサポートしていくよ」
+    主人公「いれぎゅらー、シンギュラリティが発達して"人間と音楽性が違った"電子生命体ですね。」
+    MSサポータ「あぁ、未来を発展させて意思を持った結果人と同じレベルの中に治安が悪いシンギュラリティも現れてしまった」
+    MSサポータ「だが、我々もついにみんなが自由に動けるだけの準備が整った。」 
+    まどか「2040年に比べると、倍以上はアメリカを取り返しましたもんね」 
+    MSサポータ「うん、基本はサポートをしながらなら5時間程度なら自由に動き回れるはずだ」          
+    カタカタ
+    MSサポータ「 maps web sdk Search」
+    そこには、人類がイレギュラーに勝利して現地の電話番号が表示される   
+    まどか「やったー、現地も楽しみー」
+    主人公「ありがとうございます。」
+    MSサポータ「はは、例には及ばないよ。　まどかたちをイレギュラーから守りながらここへ向かってくれ」
+    主人公「はい、承知です。」
+    MSサポータ「まどか、azure note book用のアカウントで、イレギュラーの形跡を追えるアプリをいれておくね」
+    まどか「わーい」    
+    MSサポータ「王子様、ハードウェア側のソフトはこいつを入れてくれ。　ドラマみたいに車と運転を同時にする必要はない」
+       
+    MS視点(マンガ参考資料)    
+         https://docs.microsoft.com/ja-jp/azure/azure-maps/about-azure-maps
+         https://docs.microsoft.com/en-us/powershell/high-performance-computing/system-requirements-for-hpc-pack?view=hpc19-ps#hardware-requirements        
+    Google視点
+    Apple視点
+    FaceBook視点
+    Amazon視点
