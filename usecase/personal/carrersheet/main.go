@@ -1,17 +1,58 @@
 package main
 
 import (
+	"bufio"
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
 	"log"
 	"os"
 	"strconv"
+	"strings"
 	"time"
+
+	"golang.org/x/text/encoding/japanese"
+	"golang.org/x/text/transform"
 )
+
+// 1ヵ月当たりでの時間 週5 8時間で経験者を数える
+const MonthHour = 8 * 20
+
+// 経験年数〇年　用の時間
+const YearHour = MonthHour * 12
 
 // 個人 - スキルシート集計結果編
 // 年数ではなく粒度を把握するためを想定
+
+// 基本情報データ
+type PersonalBasicInformation struct {
+	Id           int    `json:"id"`
+	NickName     string `json:"nick_name"`
+	FromName     string `json:"from_name"`
+	RealLocation string `json:"real_location"`
+}
+
+// 業務用の住所情報
+type LocationInformation struct {
+	// 地方公共団体コード
+	AreaCode int `json:"area_code"`
+	// 郵便番号(旧)
+	OldPostNum int `json:"old_post_num"`
+	// 郵便番号
+	PostNum string `json:"post_num"`
+	// 都道府県名(カナ)
+	PrefectureKana string `json:"prefecture_kana"`
+	// 市区町村名(カナ)
+	CityNameKana string `json:"city_name_kana"`
+	// 町域名(カナ)
+	TownNameKana string `json:"town_name_kana"`
+	// 都道府県名
+	PrefectureName string `json:"prefecture_name"`
+	// 市区町村名
+	CityName string `json:"city_name"`
+	// 町域名
+	TownName string `json:"town_name"`
+}
 
 // 業務のプロジェクト及び所属業務一覧
 type TaskProject struct {
@@ -54,6 +95,13 @@ type JobDescription struct {
 	Name     string `json:"name"`
 }
 
+// おかいものしたもの
+type ShoppingHistory struct {
+	// おみせ番号
+	ShopId int `json:"shop_id"`
+	// こうにゅうしたもの
+}
+
 // アプリ側で利用するコンテンツデータ
 // パッケージデータとしてダウンロードできるように１個の構造体に設定
 // 容姿ではなく、開発プロジェクトにジョインするための内容として集計
@@ -72,8 +120,35 @@ type JocContentsDatabase struct {
 	JobDescriptions []JobDescription `json:"jobdescriptions"`
 }
 
+// 生みだしたアイテムの効果 素材や当時のスキルで効果が違う
+type ItemEffect struct {
+	EffectType  int    `json:"effect_type"`
+	EffectValue int    `json:"effect_value"`
+	CreatedAt   string `json:"created_at"`
+}
+
+type MyItem struct {
+	No     int        `json:"no"`
+	Name   string     `json:"name"`
+	Effect ItemEffect `json:"effect"`
+}
+
+// 制作物や自伝や所有物といった自由に持ち出せるアイテム
+type MyItemnList struct {
+	Items []MyItem `json:"items"`
+}
+
+// 解放ミッション一覧
+type MissionData struct {
+	// 開発やスキル系の判定 自分の持っているアイテムで開放値
+	ItemBorder int `json:"item_border"`
+	// 経験値の判定
+
+}
+
 // ダウンロード時のデータ取得
 type CarrerResult struct {
+	// 各プロジェクトでのコミット時間やジャンルの一覧
 	Elements []TaskElement `json:"elements"`
 }
 
@@ -94,8 +169,14 @@ type TaskElement struct {
 	// プロジェクトジョイン時の作業開始時刻
 	StartAt string `json:"startat"`
 
-	// 開発及び関連作業工数
-	Hour         int    `json:"hour"`
+	// 開発及び関連作業工数 作業時間
+	Hour int `json:"hour"`
+
+	// 経験年数表示用
+	DisplayYear int `json:"display_year"`
+	// 経験月数
+	DisplayMonth int `json:"display_month"`
+
 	DocumentHour int    `json:"document_hour"`
 	JobLevel     int    `json:"job_level"`
 	PartNote     string `json:"note"`
@@ -147,6 +228,41 @@ func main() {
 
 	defer f.Close()
 
+	// 郵便番号からの履歴書生成と郵送をする
+	csvF, err := os.Open("masterdata/ken_all.csv")
+	if err != nil {
+		println(err.Error())
+		return
+	}
+
+	defer csvF.Close()
+
+	// 郵便局設定
+	scanner := bufio.NewScanner(transform.NewReader(csvF, japanese.ShiftJIS.NewDecoder()))
+
+	var locaionInformations = map[string]*LocationInformation{}
+
+	for scanner.Scan() {
+		splitDataRow := strings.Split(scanner.Text(), ",")
+		areaCode, _ := strconv.Atoi(splitDataRow[0])
+		oldPostNum, _ := strconv.Atoi(splitDataRow[1])
+		// 郵便局での一覧を設定する
+		if splitDataRow[2] == "1520023" {
+			println(splitDataRow[2])
+		}
+		locaionInformations[splitDataRow[2]] = &LocationInformation{
+			AreaCode:       areaCode,
+			OldPostNum:     oldPostNum,
+			PostNum:        splitDataRow[2],
+			PrefectureKana: splitDataRow[3],
+			CityNameKana:   splitDataRow[4],
+			TownNameKana:   splitDataRow[5],
+			PrefectureName: splitDataRow[6],
+			CityName:       splitDataRow[7],
+			TownName:       splitDataRow[8],
+		}
+	}
+
 	// データ保存処理を開始(クライアントアプリ向けに整形をする)
 
 	// 自分自身の経歴データ
@@ -158,6 +274,75 @@ func main() {
 
 	// 一般向けデータを出力して保存
 	personalData := createPersonalConvert()
+
+	personalBasicData := &PersonalBasicInformation{
+		NickName:     "かいはつのもり　じゅうにんくん",
+		FromName:     "ためされるだいち",
+		RealLocation: "1520023",
+	}
+
+	println("履歴書")
+
+	println("")
+	println("")
+
+	println("基本情報")
+	println("------------------------------")
+
+	println(fmt.Sprintf("登録名称 %s", personalBasicData.NickName))
+	println("------------------------------")
+
+	println("")
+	println("")
+
+	println(fmt.Sprintf("紹介者向け出身地 %s", personalBasicData.FromName))
+
+	println("------------------------------")
+
+	println("")
+	println("")
+
+	location, _ := locaionInformations[fmt.Sprintf(`"%s"`, personalBasicData.RealLocation)]
+
+	println("")
+	println("")
+	println("------------------------------")
+
+	println(fmt.Sprintf("郵便番号 〒%s", location.PostNum))
+	println(fmt.Sprintf("連絡先住所 %s %s %s ", location.PrefectureName, location.CityName, location.TownName))
+
+	println("")
+	println("")
+	println("------------------------------")
+
+	println("")
+	println("")
+	println("------------------------------")
+
+	for i := range personalData.TaskElements {
+
+		hour := personalData.TaskElements[i].Hour
+		personalData.TaskElements[i].DisplayMonth = 0
+		// １ヵ月以上の経験になった
+		if hour >= MonthHour && hour >= YearHour {
+			// 〇ヵ月の経験を設定
+			personalData.TaskElements[i].DisplayMonth = hour % 12
+		} else if hour >= MonthHour {
+			// 1年未満数ヵ月の経験者
+			personalData.TaskElements[i].DisplayMonth = hour / MonthHour
+		}
+		// 〇年以上の計算(通年雇用)
+		personalData.TaskElements[i].DisplayYear = 0
+		// １年以上の経験者を出力できるように設定
+		if hour >= YearHour {
+			personalData.TaskElements[i].DisplayYear = hour / YearHour
+		}
+		message := fmt.Sprintf("参加したおしごと %s 参画工数 %d  ", personalData.TaskElements[i].Name, personalData.TaskElements[i].Hour)
+		println(message)
+		displayMessage := fmt.Sprintf("業務内容 %s 開始日時 %s ～ %d年 %dヵ月 経験  ", personalData.TaskElements[i].PartNote, personalData.TaskElements[i].StartAt, personalData.TaskElements[i].DisplayYear, personalData.TaskElements[i].DisplayMonth)
+		println(displayMessage)
+
+	}
 
 	body, err = json.Marshal(personalData)
 	if err != nil {
@@ -466,8 +651,6 @@ func createJocContentsDatabase() *JocContentsDatabase {
 			TotalSum: 50,
 		},
 	}
-	// #ダレハナ 今起きているか知らないけど、いいねー
-	// #ダレハナ
 	jobDescriptions := []JobDescription{
 		JobDescription{
 			Id:       1,
